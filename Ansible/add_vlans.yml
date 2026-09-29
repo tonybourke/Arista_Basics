@@ -1,0 +1,14 @@
+---
+- name: Add VLANs
+  hosts: spine1, leaf1, leaf2, leaf3, l2ext1
+  tasks:
+    - name: Add VLANs
+      arista.eos.eos_vlans:
+        config:
+          - vlan_id: 10
+            state: active
+            name: DMZ
+          - vlan_id: 20
+            state: active
+            name: Internal
+        state: merged

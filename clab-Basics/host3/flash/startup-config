@@ -1,0 +1,59 @@
+! Startup-config last modified at Tue Sep 29 23:24:49 2026 by admin
+! device: host3 (cEOSLab, EOS-4.36.2F-49692632.4362F.1 (engineering build))
+!
+no aaa root
+!
+username admin privilege 15 role network-admin secret sha512 $6$0d6yr0enJ2E93Jm9$9H1t.y.K3l/BQN9Pvugg1I59BKqhhkLsK53gVXGL3c/V1azcKBHZZg7ju.zvG8yqRQE9edVt6VXAO3iSD5zeh/
+username admin ssh-key ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKqsaaxcRICWgTn3NfOj/6jkQqerZJIDIKgZJ2aycLtN tony@debian-template
+!
+management api http-commands
+   no shutdown
+   !
+   vrf MGMT
+      no shutdown
+!
+no service interface inactive port-id allocation disabled
+!
+service routing protocols model multi-agent
+!
+hostname host3
+!
+spanning-tree mode mstp
+!
+system l1
+   unsupported speed action error
+   unsupported error-correction action error
+!
+vrf instance MGMT
+!
+management api gnmi
+   transport grpc default
+      vrf MGMT
+!
+management api netconf
+   transport ssh default
+      vrf MGMT
+!
+aaa authorization exec default local
+!
+interface Port-Channel1
+   no switchport
+   ip address 10.1.10.13/24
+!
+interface Ethernet1
+   channel-group 1 mode active
+!
+interface Ethernet2
+   channel-group 1 mode active
+!
+interface Management0
+   vrf MGMT
+   ip address 172.20.20.93/24
+!
+no ip routing
+no ip routing vrf MGMT
+!
+ip route 0.0.0.0/0 10.1.10.1
+ip route vrf MGMT 0.0.0.0/0 172.20.20.1
+!
+end

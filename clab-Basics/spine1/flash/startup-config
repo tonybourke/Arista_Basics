@@ -1,0 +1,140 @@
+! Startup-config last modified at Tue Sep 29 23:24:48 2026 by admin
+! device: spine1 (cEOSLab, EOS-4.36.2F-49692632.4362F.1 (engineering build))
+!
+no aaa root
+!
+username admin privilege 15 role network-admin secret sha512 $6$0D1BZmYT0rFWxtFf$3f2vqpchlq7ZfOdJE9CWSBRUgMG03ifP1qmDC5e2Tv9jPy19pvYOG/QyjmhZg8srrPybSGj21SVgy5tYi5xB//
+username admin ssh-key ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKqsaaxcRICWgTn3NfOj/6jkQqerZJIDIKgZJ2aycLtN tony@debian-template
+!
+management api http-commands
+   no shutdown
+   !
+   vrf MGMT
+      no shutdown
+!
+no service interface inactive port-id allocation disabled
+!
+service routing protocols model multi-agent
+!
+hostname spine1
+!
+spanning-tree mode mstp
+spanning-tree mst 0 priority 4096
+!
+system l1
+   unsupported speed action error
+   unsupported error-correction action error
+!
+vlan 10
+   name DMZ
+!
+vlan 20
+   name Internal
+!
+vrf instance MGMT
+!
+management api gnmi
+   transport grpc default
+      vrf MGMT
+!
+management api netconf
+   transport ssh default
+      vrf MGMT
+!
+aaa authorization exec default local
+!
+interface Port-Channel1
+   switchport trunk allowed vlan 10,20
+   switchport mode trunk
+!
+interface Port-Channel2
+   switchport trunk allowed vlan 10,20
+   switchport mode trunk
+!
+interface Port-Channel3
+   switchport trunk allowed vlan 10,20
+   switchport mode trunk
+!
+interface Ethernet1
+   channel-group 1 mode active
+!
+interface Ethernet2
+   channel-group 1 mode active
+!
+interface Ethernet3
+   channel-group 1 mode active
+!
+interface Ethernet4
+   channel-group 2 mode active
+!
+interface Ethernet5
+   channel-group 2 mode active
+!
+interface Ethernet6
+   channel-group 3 mode active
+!
+interface Ethernet7
+   channel-group 3 mode active
+!
+interface Ethernet8
+   no switchport
+   ip address 10.1.5.1/31
+   ip ospf network point-to-point
+   ip ospf area 0.0.0.0
+!
+interface Ethernet9
+   no switchport
+   ip address 10.1.5.3/31
+   ip ospf network point-to-point
+   ip ospf area 0.0.0.0
+!
+interface Ethernet10
+   no switchport
+   ip address 10.1.5.5/31
+!
+interface Ethernet11
+   no switchport
+   ip address 10.1.5.7/31
+!
+interface Loopback1
+   ip address 172.16.10.1/24
+   ip ospf area 0.0.0.0
+!
+interface Management0
+   vrf MGMT
+   ip address 172.20.20.101/24
+!
+interface Vlan10
+   ip address 10.1.10.1/24
+   ip ospf area 0.0.0.0
+!
+interface Vlan20
+   ip address 10.1.20.1/24
+   ip ospf area 0.0.0.0
+!
+ip routing
+no ip routing vrf MGMT
+!
+ip route vrf MGMT 0.0.0.0/0 172.20.20.1
+!
+router bgp 1
+   router-id 0.0.0.1
+   maximum-paths 2 ecmp 2
+   neighbor R2 peer group
+   neighbor R2 remote-as 2
+   neighbor 10.1.5.4 peer group R2
+   neighbor 10.1.5.6 peer group R2
+   !
+   address-family ipv4
+      neighbor R2 activate
+      network 10.1.10.0/24
+      network 10.1.20.0/24
+      network 172.16.10.0/24
+      redistribute ospf
+!
+router ospf 10
+   router-id 255.255.255.255
+   redistribute bgp
+   max-lsa 12000
+!
+end
